@@ -3,32 +3,34 @@
 # This file is distributed under the same license as the gnome-tour package.
 # Piotr Drąg <piotrdrag@gmail.com>, 2020-2024.
 # Aviary.pl <community-poland@mozilla.org>, 2020-2024.
+# Marcel Mrówka <micro.mail88@gmail.com>, 2026.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: gnome-tour\n"
-"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-tour\n"
-"POT-Creation-Date: 2024-02-18 19:04+0000\n"
-"PO-Revision-Date: 2024-03-10 16:04+0100\n"
-"Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
-"Language-Team: Polish <community-poland@mozilla.org>\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-tour/issues/\n"
+"POT-Creation-Date: 2026-04-03 17:30+0000\n"
+"PO-Revision-Date: 2026-08-22 15:11+0200\n"
+"Last-Translator: Marcel Mrówka <micro.mail88@gmail.com>\n"
+"Language-Team: Polish <https://l10n.gnome.org/teams/pl/>\n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
-"|| n%100>=20) ? 1 : 2;\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
+"|| n%100>=20) ? 1 : 2);\n"
+"X-Generator: Gtranslator 50.0\n"
 
-#: data/org.gnome.Tour.desktop.in.in:3 data/org.gnome.Tour.metainfo.xml.in.in:7
-#: src/main.rs:21
+#: data/org.gnome.Tour.desktop.in.in:2 data/org.gnome.Tour.metainfo.xml.in.in:7
+#: src/main.rs:26
 msgid "Tour"
 msgstr "Przewodnik"
 
-#: data/org.gnome.Tour.desktop.in.in:4
+#: data/org.gnome.Tour.desktop.in.in:3
 msgid "Greeter & Tour"
 msgstr "Ekran powitalny i przewodnik"
 
-#: data/org.gnome.Tour.desktop.in.in:9
+#: data/org.gnome.Tour.desktop.in.in:8
 msgid "Gnome;GTK;"
 msgstr "GNOME;GTK;"
 
@@ -41,7 +43,8 @@ msgid "A guided tour and greeter for GNOME."
 msgstr "Przewodnik po środowisku GNOME i ekran powitalny."
 
 #. developer_name tag deprecated with Appstream 1.0
-#: data/org.gnome.Tour.metainfo.xml.in.in:45
+#: data/org.gnome.Tour.metainfo.xml.in.in:63
+#: data/org.gnome.Tour.metainfo.xml.in.in:65
 msgid "The GNOME Project"
 msgstr "Projekt GNOME"
 
@@ -55,7 +58,7 @@ msgstr "Dalej"
 
 #: data/resources/ui/paginator.ui:51
 msgid "Start"
-msgstr "Rozpoczyna"
+msgstr "Rozpocznij"
 
 #: data/resources/ui/window.ui:11
 msgid "Let's Begin"
@@ -71,8 +74,8 @@ msgid ""
 "The overview shows all your apps and windows. Press the Super (Windows) key "
 "to open it."
 msgstr ""
-"Ekran podglądu pokazuje wszystkie programy i okna. Naciśnij klawisz Super "
-"(z logo Windows), aby go otworzyć."
+"Ekran podglądu pokazuje wszystkie aplikacje i okna. Naciśnij klawisz Super "
+"(Windows), aby go otworzyć."
 
 #: data/resources/ui/window.ui:24
 msgid "Powerful Search"
@@ -83,9 +86,9 @@ msgid ""
 "To search, just start typing in the overview. You can use search to launch "
 "apps, find files, perform calculations, and more."
 msgstr ""
-"Aby zacząć szukać, po prostu zacznij pisać na ekranie podglądu. Można używać "
-"wyszukiwania do uruchamiania programów, znajdowania plików, wykonywania "
-"obliczeń i nie tylko."
+"Aby rozpocząć wyszukiwanie, po prostu zacznij pisać na ekranie podglądu. "
+"Można używać wyszukiwania do uruchamiania aplikacji, znajdowania plików, "
+"wykonywania obliczeń i nie tylko."
 
 #: data/resources/ui/window.ui:31
 msgid "Stay Organized With Workspaces"
@@ -126,10 +129,11 @@ msgstr "To wszystko!"
 
 #: data/resources/ui/window.ui:53
 msgid "To get more advice and tips, see the Help app."
-msgstr "Program „Pomoc” zawiera więcej porad i wskazówek."
+msgstr "Aplikacja Pomoc zawiera więcej porad i wskazówek."
 
 #. Translators: The following string is formatted as "Learn about new and essential
 #. features in GNOME 3.36" for example
-#: src/widgets/window.rs:69
+#: src/widgets/window.rs:71
+#, rust-format
 msgid "Learn about the key features in {name} {version}."
 msgstr "Poznaj kluczowe funkcje systemu {name} {version}."
