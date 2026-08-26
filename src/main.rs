@@ -17,7 +17,10 @@ fn main() -> glib::ExitCode {
     log_builder.init();
 
     // Prepare i18n
-    setlocale(LocaleCategory::LcAll, "");
+    unsafe {
+        // SAFETY: Unsafe because it may not be called with concurrent changes to env variables
+        setlocale(LocaleCategory::LcAll, "");
+    }
     bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR)
         .unwrap_or_else(|_| panic!("Unable to bind text domain for {GETTEXT_PACKAGE}"));
     textdomain(GETTEXT_PACKAGE)
