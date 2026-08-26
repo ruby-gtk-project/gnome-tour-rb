@@ -8,7 +8,7 @@ rust-version = "1.93"
 gtk = { package = "gtk4", version = "0.11.0", features = ["v4_24"] }
 glib = { version = "0.22.0", features = ["v2_68"] }
 log = "0.4"
-gettext-rs = { version = "0.7", features = ["gettext-system"] }
+gettext-rs = { version = "0.8", features = ["gettext-system"] }
 adw = { package = "libadwaita", version = "0.9.0" }
 env_logger = "0.11"
 regex = "1.10"
