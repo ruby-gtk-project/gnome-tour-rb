@@ -7,7 +7,7 @@ Terminal=false
 Categories=GNOME;GTK;Documentation;Utility;
 Keywords=Gnome;GTK;
 # Translators: Do NOT translate or transliterate this text (this is an icon file name)!
-Icon=org.gnome.Tour.Rb
+Icon=@APP_ID@
 DBusActivatable=true
 StartupNotify=true
 OnlyShowIn=GNOME;

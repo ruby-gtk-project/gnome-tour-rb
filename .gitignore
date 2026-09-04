@@ -2,3 +2,7 @@
 /vendor/bundle/
 /result
 /tmp/
+data/org.gnome.Tour.Rb.desktop
+data/org.gnome.Tour.Rb.metainfo.xml
+data/org.gnome.Tour.RbDevel.desktop
+data/org.gnome.Tour.RbDevel.metainfo.xml

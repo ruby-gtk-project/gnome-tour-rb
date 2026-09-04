@@ -62,7 +62,9 @@ module GnomeTourRb
       {}.tap do |catalogue|
         entry = new_entry
 
-        File.foreach(path) do |line|
+        # Explicitly UTF-8: PO files are, but Ruby would otherwise decode them
+        # with the locale's encoding, which is US-ASCII under a bare `LANG=C`.
+        File.foreach(path, encoding: 'UTF-8') do |line|
           entry = consume(catalogue, entry, line.chomp)
         end
 

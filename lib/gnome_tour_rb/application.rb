@@ -3,7 +3,9 @@
 require 'gtk4'
 require 'adwaita'
 
+require_relative 'config'
 require_relative 'i18n'
+require_relative 'log'
 require_relative 'paths'
 require_relative 'window'
 
@@ -14,9 +16,14 @@ module GnomeTourRb
   class Application
     include I18n
 
-    APP_ID = Window::APP_ID
-
     def build
+      Log.banner
+
+      # Upstream sets this from `main`, before the application exists; it is
+      # what the shell shows for the app in notifications and the alt-tab
+      # switcher when there is no window title.
+      GLib.application_name = _('Tour')
+
       app.tap do |a|
         a.signal_connect('startup') do
           # Without this libadwaita never loads its stylesheet, so `title-1`,
@@ -67,19 +74,19 @@ module GnomeTourRb
     # `url()` in a provider loaded from a string has no base to resolve
     # against, so the artwork is referenced by absolute file URI.
     def stylesheet_source
-      File.read(Paths.stylesheet).gsub('@ASSETS@', "file://#{File.join(Paths.data_dir, 'assets')}")
+      File.read(Paths.stylesheet, encoding: 'UTF-8').gsub('@ASSETS@', "file://#{File.join(Paths.data_dir, 'assets')}")
     end
 
     def install_quit_action
       app.add_action(
         Gio::SimpleAction.new('quit').tap do |action|
-                action.signal_connect('activate') { app.quit }
-              end,
+          action.signal_connect('activate') { app.quit }
+        end,
       )
     end
 
     def app
-      @app ||= Gtk::Application.new(APP_ID, :default_flags).tap do |a|
+      @app ||= Gtk::Application.new(Config.app_id, :default_flags).tap do |a|
         a.resource_base_path = '/org/gnome/Tour'
       end
     end

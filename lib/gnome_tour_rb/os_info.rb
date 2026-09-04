@@ -22,7 +22,7 @@ module GnomeTourRb
     def parse(path)
       case path
       when nil then {}
-      else parse_lines(File.readlines(path))
+      else parse_lines(File.readlines(path, encoding: 'UTF-8'))
       end
     end
 

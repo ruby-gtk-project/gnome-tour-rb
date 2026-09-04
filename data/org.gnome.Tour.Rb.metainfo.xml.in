@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Bilal Elmoussaoui 2020 <bilal.elmoussaoui@gnome.org> -->
 <component type="desktop-application">
-  <id>org.gnome.Tour.Rb</id>
+  <id>@APP_ID@</id>
   <metadata_license>CC0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
-  <name>Tour (Ruby)</name>
+  <name>Tour</name>
   <summary>GNOME Tour and Greeter</summary>
   <description>
     <p>A guided tour and greeter for GNOME.</p>
@@ -66,5 +66,5 @@
   </developer>
   <update_contact>bilal.elmoussaoui@gnome.org</update_contact>
   <translation type="gettext">@gettext-package@</translation>
-  <launchable type="desktop-id">org.gnome.Tour.Rb.desktop</launchable>
+  <launchable type="desktop-id">@APP_ID@.desktop</launchable>
 </component>

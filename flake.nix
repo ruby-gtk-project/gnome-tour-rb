@@ -103,17 +103,44 @@
           gemdir = ./.;
         };
 
-      in
-      {
-        packages.default = pkgs.stdenv.mkDerivation {
-          pname = "gnome-tour-rb";
-          version = "0.1.0";
+        # Upstream's meson `profile` option: the development build gets its own
+        # application id and icon, and the window wears the `devel` header.
+        mkTour = { profile ? "default" }:
+          let
+            appId =
+              if profile == "development" then "org.gnome.Tour.RbDevel"
+              else "org.gnome.Tour.Rb";
+          in
+          pkgs.stdenv.mkDerivation {
+          pname = if profile == "development" then "gnome-tour-rb-devel" else "gnome-tour-rb";
+          version = "50.0";
           src = ./.;
 
-          nativeBuildInputs = [ pkgs.makeWrapper ];
+
+          GNOME_TOUR_RB_PROFILE = profile;
+
+          nativeBuildInputs = [
+            pkgs.makeWrapper
+            pkgs.desktop-file-utils   # desktop-file-validate
+            pkgs.appstream            # appstreamcli validate
+          ];
           buildInputs = [ gems ] ++ gtkStack;
 
-          dontBuild = true;
+          # Stands in for meson's i18n.merge_file: folds po/*.po back into the
+          # desktop entry and the metainfo, and stamps in the application id.
+          buildPhase = ''
+            runHook preBuild
+            ${gems.wrappedRuby}/bin/ruby scripts/merge_translations.rb data
+            runHook postBuild
+          '';
+
+          doCheck = true;
+          checkPhase = ''
+            runHook preCheck
+            desktop-file-validate data/${appId}.desktop
+            appstreamcli validate --no-net --explain data/${appId}.metainfo.xml
+            runHook postCheck
+          '';
 
           installPhase = ''
             runHook preInstall
@@ -124,20 +151,24 @@
             # bin/ has to sit next to lib/ for the launcher's require_relative.
             install -Dm755 bin/gnome-tour-rb $out/share/gnome-tour-rb/bin/gnome-tour-rb
 
-            cp data/org.gnome.Tour.Rb.desktop $out/share/applications/
-            sed "s|@BINDIR@|$out/bin|" data/org.gnome.Tour.Rb.service \
-              > $out/share/dbus-1/services/org.gnome.Tour.Rb.service
-            install -Dm644 data/org.gnome.Tour.Rb.metainfo.xml -t $out/share/metainfo
-            install -Dm644 data/icons/hicolor/scalable/apps/org.gnome.Tour.Rb.svg \
+            cp data/${appId}.desktop $out/share/applications/
+            sed "s|@BINDIR@|$out/bin|; s|@APP_ID@|${appId}|" data/org.gnome.Tour.Rb.service \
+              > $out/share/dbus-1/services/${appId}.service
+            install -Dm644 data/${appId}.metainfo.xml -t $out/share/metainfo
+
+            # The icon is named for the profile; the symbolic one is renamed to
+            # match, the way meson installs it.
+            install -Dm644 data/icons/hicolor/scalable/apps/${appId}.svg \
               -t $out/share/icons/hicolor/scalable/apps
             install -Dm644 data/icons/hicolor/scalable/apps/org.gnome.Tour.Rb-symbolic.svg \
-              -t $out/share/icons/hicolor/symbolic/apps
+              $out/share/icons/hicolor/symbolic/apps/${appId}-symbolic.svg
 
             # -rbundler/setup puts the bundled gems on the load path, and
             # GI_TYPELIB_PATH keeps GObject-Introspection from re-registering
             # types the cairo gem's C extension has already registered.
             makeWrapper ${gems.wrappedRuby}/bin/ruby $out/bin/gnome-tour-rb \
               --add-flags "-rbundler/setup" \
+              --set GNOME_TOUR_RB_PROFILE "${profile}" \
               --add-flags "$out/share/gnome-tour-rb/bin/gnome-tour-rb" \
               --set GI_TYPELIB_PATH "${typelibPath}" \
               --set GDK_PIXBUF_MODULE_FILE "${pkgs.librsvg}/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache" \
@@ -149,6 +180,11 @@
             runHook postInstall
           '';
         };
+
+      in
+      {
+        packages.default = mkTour { };
+        packages.devel = mkTour { profile = "development"; };
 
         apps.default = flake-utils.lib.mkApp { drv = self.packages.${system}.default; };
 
@@ -163,6 +199,8 @@
             pkgs.pkg-config
             pkgs.adwaita-icon-theme
             pkgs.gsettings-desktop-schemas
+            pkgs.desktop-file-utils   # rake validate
+            pkgs.appstream            # rake validate
           ] ++ gtkStack;
 
           # Icons, GSettings schemas and the GTK portal all resolve through

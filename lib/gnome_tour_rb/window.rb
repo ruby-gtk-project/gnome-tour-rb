@@ -3,6 +3,7 @@
 require 'gtk4'
 require 'adwaita'
 
+require_relative 'config'
 require_relative 'i18n'
 require_relative 'image_page'
 require_relative 'os_info'
@@ -13,8 +14,6 @@ module GnomeTourRb
   # `win.` actions the navigation buttons and the Escape accelerator drive.
   class Window
     include I18n
-
-    APP_ID = 'org.gnome.Tour.Rb'
 
     # Page content, in carousel order. The welcome page's body is filled in at
     # construction time from the running distribution's name and version.
@@ -123,7 +122,13 @@ module GnomeTourRb
     def window
       @window ||= Adwaita::ApplicationWindow.new(application).tap do |win|
         win.set_default_size(960, 720)
-        win.icon_name = APP_ID
+        win.icon_name = Config.app_id
+
+        # A development build wears the striped Adwaita header so it cannot be
+        # mistaken for the installed one.
+        case Config.development?
+        when true then win.add_css_class('devel')
+        end
       end
     end
 

@@ -11,8 +11,11 @@ ruby-gnome defects found on the way.
 | `src/widgets/window.rs` + `ui/window.ui` | `lib/gnome_tour_rb/window.rb`, with the seven pages as a `PAGES` constant |
 | `src/widgets/paginator.rs` + `ui/paginator.ui` | `lib/gnome_tour_rb/paginator.rb` |
 | `src/widgets/image_page.rs` + `ui/image-page.ui` | `lib/gnome_tour_rb/image_page.rb` |
+| `src/main.rs` — logging, i18n, resource registration | `lib/gnome_tour_rb/log.rb` and `Application#build` |
+| `src/config.rs.in` + the meson `profile` option | `lib/gnome_tour_rb/config.rb`, driven by `GNOME_TOUR_RB_PROFILE` |
 | `gettext` | `lib/gnome_tour_rb/i18n.rb` |
 | `glib::os_info` | `lib/gnome_tour_rb/os_info.rb` |
+| `i18n.merge_file` in `data/meson.build` | `scripts/merge_translations.rb` |
 | GResource bundle | plain files under `data/` |
 
 The page-fade arithmetic in `Paginator#opacities` is a direct transcription of
@@ -42,6 +45,28 @@ gettext gem would add a dependency plus a msgfmt build step. The catalogue is
 ten strings, so `I18n` reads the shipped `po/*.po` files directly. Plural
 forms and message contexts are not implemented — this catalogue uses neither.
 
+The same reader backs `scripts/merge_translations.rb`, which stands in for
+meson's `i18n.merge_file`: it substitutes the application id into
+`data/*.desktop.in` and `data/*.metainfo.xml.in` and folds every translation
+back in as `Name[lang]=` lines and `xml:lang` siblings, so the app is localised
+in the shell and the software centre as well as in its own window. The nix
+build runs it and then validates the result with `desktop-file-validate` and
+`appstreamcli validate`, the way upstream's meson tests do; `rake validate`
+does the same locally.
+
+**The build profile is an environment variable.** Upstream picks it at
+configure time with `-Dprofile=development`; there is no configure step here,
+so `Config` reads `GNOME_TOUR_RB_PROFILE`. It does the same three things
+upstream's does: suffixes the application id (`org.gnome.Tour.RbDevel`),
+stamps the short commit SHA into the version, and puts the `devel` style class
+on the window. `nix build .#devel` produces that build, icon and all.
+
+**Logging is stdlib `Logger`.** Upstream uses `env_logger` plus a shim that
+turns on debug for its own module when `G_MESSAGES_DEBUG` would not have
+dropped it. `Log` keeps that behaviour: silent by default, debug when
+`G_MESSAGES_DEBUG` names `gnome_tour_rb` or `all`, and `GNOME_TOUR_RB_LOG` sets
+a level outright. The three startup lines upstream logs are logged here too.
+
 ## ruby-gnome defects and environment traps
 
 **`Adwaita.init` is not called for you.** `AdwApplication` is still broken in
@@ -60,6 +85,17 @@ Use `Gtk::IconTheme.get_for_display(Gdk::Display.default)` and
 
 **`Gio::ActionMap#list_actions` is missing**; `has_action?` works.
 `Gtk::Application` exposes `get_accels_for_action`, not `accels_for_action`.
+
+**Destroying an `Adwaita::ApplicationWindow` that was never presented
+segfaults** — not an exception, a `Gdk-CRITICAL` about a null surface followed
+by SIGSEGV inside the introspection loader. `test/drive_tour.rb` builds its
+throwaway devel window and simply leaves it for the application to take down.
+
+**Data files must be read as UTF-8 explicitly.** Ruby decodes with the
+locale's encoding, which is US-ASCII under a bare `LANG=C` — as in a nix build
+sandbox — and every `po/*.po` file then raises `invalid byte sequence in
+US-ASCII`. The catalogue, os-release and stylesheet readers all pass
+`encoding: 'UTF-8'`.
 
 **CSS background images need librsvg.** GTK loads CSS `url()` images through
 gdk-pixbuf, so without librsvg's SVG loader the swipe pages' animated

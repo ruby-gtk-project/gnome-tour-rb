@@ -129,6 +129,23 @@ GtkDriver.drive(app, shots: 'tmp/shots') do |d, _app|
     end
   end
 
+  d.step('a development build wears the devel header') do
+    ENV['GNOME_TOUR_RB_PROFILE'] = 'development'
+
+    begin
+      # Built, not presented, and deliberately not destroyed: tearing down an
+      # AdwApplicationWindow that was never presented segfaults the bindings.
+      GnomeTourRb::Window.new(app.app).window.tap do |devel_window|
+        d.check('devel style class') { devel_window.css_classes.include?('devel') }
+        d.check('devel icon name') { devel_window.icon_name == 'org.gnome.Tour.RbDevel' }
+      end
+    ensure
+      ENV['GNOME_TOUR_RB_PROFILE'] = nil
+    end
+
+    d.check('the default build does not') { !window.call.window.css_classes.include?('devel') }
+  end
+
   d.step('back at the start') do
     d.check('try_previous reports the start of the tour') { paginator.call.try_previous.nil? }
     d.check('start button is back') { paginator.call.start_button.visible? }

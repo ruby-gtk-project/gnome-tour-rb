@@ -1,0 +1,5 @@
+data/org.gnome.Tour.Rb.desktop.in
+data/org.gnome.Tour.Rb.metainfo.xml.in
+lib/gnome_tour_rb/application.rb
+lib/gnome_tour_rb/paginator.rb
+lib/gnome_tour_rb/window.rb

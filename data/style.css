@@ -1,5 +1,4 @@
-/* Pages. @ASSETS@ is substituted with the absolute assets directory when the
-   stylesheet is loaded — upstream referenced these through a GResource. */
+/* pages */
 
 @keyframes up-and-down {
   from {
@@ -20,6 +19,12 @@
     background-position: 60% 30%, center 30%, center;
   }
 }
+
+/* .page:nth-child(2) { background: linear-gradient(to right, #3584e4, #1a5fb4); }  overview */
+.page:nth-child(3) {}
+
+/* customize */
+/* .page:nth-child(4) { background: linear-gradient(to right, #e66100, #c64600); }  workspaces */
 
 .page:nth-child(5) {
   /* up down */
