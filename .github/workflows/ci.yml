@@ -1,0 +1,39 @@
+# Upstream's GitLab CI builds a Flatpak and checks formatting with rustfmt.
+# The equivalents here are the nix build — which also merges the translations
+# into the desktop entry and metainfo and validates both — and `rake`, which
+# runs the checks and rubocop.
+name: CI
+
+on:
+  push:
+    branches: [ruby]
+  pull_request:
+    branches: [ruby]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: cachix/install-nix-action@v27
+        with:
+          extra_nix_config: experimental-features = nix-command flakes
+
+      - name: Build
+        run: nix build --print-build-logs
+
+      - name: Build the development profile
+        run: nix build .#devel --print-build-logs
+
+      # GTK4 renders to an offscreen surface, so the UI checks and their
+      # screenshots need no display server and no Xvfb.
+      - name: Checks and lint
+        run: nix develop --command rake
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots
+          path: tmp/shots
+          if-no-files-found: warn

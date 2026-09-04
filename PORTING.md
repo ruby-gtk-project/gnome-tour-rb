@@ -114,10 +114,20 @@ puts librsvg in the shell and sets `GDK_PIXBUF_MODULE_FILE`.
 ## Not ported
 
 Upstream's `build-aux/` holds a cargo vendoring script and a Flatpak manifest
-that builds the Rust crate with meson. The nix flake here covers the same
-ground — `nix build` for the installable app, `nix build .#devel` for the
-development one — so those two are not carried over. Everything else upstream
-ships has an equivalent here.
+that builds the Rust crate with meson, and `.gitlab-ci.yml` builds that Flatpak
+on GNOME's infrastructure. The nix flake covers the same ground —
+`nix build` for the installable app, `nix build .#devel` for the development
+one — and `.github/workflows/ci.yml` runs it here along with the checks, so
+those are not carried over. Everything else upstream ships has an equivalent:
+
+| Upstream | Here |
+| --- | --- |
+| `Cargo.toml`, `Cargo.lock` | `Gemfile`, `Gemfile.lock`, `gemset.nix` |
+| `meson.build`, `meson_options.txt`, `src/meson.build`, `data/meson.build` | `flake.nix`, `Rakefile`, `scripts/merge_translations.rb` |
+| `rustfmt.toml` | `.rubocop.yml` and `cops/` |
+| `hooks/pre-commit.hook` (rustfmt) | `hooks/pre-commit.hook` (rubocop), installed by `rake hooks` |
+| `data/resources.gresource.xml` | nothing — the files are read from `data/` |
+| `.editorconfig`, `NEWS`, `LICENSE.md`, the doap | carried over as-is |
 
 ## Testing traps
 
