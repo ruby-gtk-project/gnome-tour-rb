@@ -43,6 +43,9 @@ display — the PO reader, the os-release reader, the build-profile constants,
 the logger's level rules and the desktop/metainfo merge.
 `test/cli_test.rb` and `test/quit_test.rb` check the command line and the two
 actions that end the application, each in its own process.
+`test/locale_test.rb` runs the app in German and checks the translations
+actually reach the labels and tooltips — parsing the catalogue and rendering it
+are separate questions.
 `test/drive_tour.rb` builds the real window, walks the carousel forward and
 back through the same actions the buttons trigger, and writes screenshots to
 `tmp/shots`. It runs headlessly: GTK4 renders to an offscreen surface, so those

@@ -2,9 +2,14 @@
 
 desc 'Run the checks: the catalogue, config and os-release readers, then the UI'
 task :test do
-  %w[test/catalogue_test.rb test/config_test.rb test/cli_test.rb test/quit_test.rb
-     test/drive_tour.rb
-].each do |script|
+  %w[
+    test/catalogue_test.rb
+    test/config_test.rb
+    test/cli_test.rb
+    test/quit_test.rb
+    test/drive_tour.rb
+    test/locale_test.rb
+  ].each do |script|
     puts "\n== #{script}"
     # No display needed — GTK4 renders the window to an offscreen surface, and
     # the screenshots in tmp/shots come out the same as a real session's.
