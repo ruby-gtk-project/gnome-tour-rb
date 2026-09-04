@@ -142,6 +142,11 @@ Turning animations off with `gtk_enable_animations = false` makes the
 assertions instant, but it also stops scheduling frames, so the screenshots
 come back showing a stale layout. Not worth it.
 
+Once `settle` is doing the waiting, the driver's own tick is dead time: at the
+default half-second interval the walk took about ninety seconds and started
+tripping the 120-second watchdog. A 100 ms interval and a long watchdog bring
+it to about thirteen.
+
 The carousel's spring approaches a page asymptotically, so a check for
 "the start button is hidden" fails on a hair of leftover opacity. Assert on
 `opacity`, which is what the cross-fade actually sets.

@@ -47,9 +47,10 @@ module GnomeTourRb
         body:  'To move between workspaces, swipe three fingers horizontally.',
       },
       {
-        asset: 'ready-to-go.svg',
-        head:  "That's It!",
-        body:  'To get more advice and tips, see the Help app.',
+        asset:       'ready-to-go.svg',
+        head:        "That's It!",
+        body:        'To get more advice and tips, see the Help app.',
+        style_class: 'last-page',
       },
     ].freeze
 
@@ -136,9 +137,10 @@ module GnomeTourRb
 
       def build_image_page(page)
         ImagePage.new(
-          asset: page[:asset],
-          head:  _(page[:head]),
-          body:  _(page.fetch(:body, '')),
+          asset:       page[:asset],
+          head:        _(page[:head]),
+          body:        _(page.fetch(:body, '')),
+          style_class: page[:style_class],
         )
       end
   end

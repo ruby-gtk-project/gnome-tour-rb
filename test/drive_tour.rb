@@ -38,7 +38,11 @@ end
 
 app = GnomeTourRb::Application.new
 
-GtkDriver.drive(app, shots: 'tmp/shots') do |d, _app|
+# A short interval, because `settle` does the waiting between steps rather than
+# the tick; a long watchdog, because two infinite CSS animations on a
+# software-rendered offscreen surface make the whole walk take a couple of
+# minutes.
+GtkDriver.drive(app, shots: 'tmp/shots', interval: 100, timeout: 600) do |d, _app|
   window = -> { app.main_window }
   paginator = -> { app.main_window.paginator }
 
@@ -99,6 +103,12 @@ GtkDriver.drive(app, shots: 'tmp/shots') do |d, _app|
       window.call.image_pages[6].head_label.label == "That's It!"
     end
     d.check('next is no longer targetable') { !paginator.call.next_button.can_target? }
+    d.check('the closing page carries last-page') do
+      window.call.image_pages[6].clamp.css_classes.include?('last-page')
+    end
+    d.check('the other pages do not') do
+      window.call.image_pages[0].clamp.css_classes.none?('last-page')
+    end
     d.shot('03-last')
   end
 

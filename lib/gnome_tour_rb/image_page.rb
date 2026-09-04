@@ -14,10 +14,11 @@ module GnomeTourRb
   class ImagePage
     attr_reader :asset, :head, :body
 
-    def initialize(asset:, head:, body: '')
+    def initialize(asset:, head:, body: '', style_class: nil)
       @asset = asset
       @head = head
       @body = body
+      @style_class = style_class
     end
 
     def build
@@ -46,6 +47,13 @@ module GnomeTourRb
         c.vexpand = true
         c.halign = :fill
         c.valign = :fill
+
+        # The closing page carries `last-page` upstream, for the benefit of
+        # anything styling it from outside the app's own stylesheet.
+        case @style_class
+        when nil then nil
+        else c.add_css_class(@style_class)
+        end
       end
     end
 
