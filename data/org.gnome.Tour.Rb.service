@@ -1,0 +1,3 @@
+[D-BUS Service]
+Name=org.gnome.Tour.Rb
+Exec=@BINDIR@/gnome-tour-rb --gapplication-service

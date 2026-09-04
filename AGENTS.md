@@ -1,8 +1,8 @@
 # gnome-tour — Ruby port
 
-This branch is an empty `ruby` orphan branch. The upstream code (the original
-implementation of gnome-tour) lives on the fork's other branches; this branch is
-where the Ruby GTK4 / Libadwaita port is written.
+The Ruby GTK4 / Libadwaita port of GNOME Tour. The upstream Rust
+implementation lives on the fork's other branches (`main` and the `gnome-*`
+release branches); this branch is the port.
 
 ## Skills — use them
 
@@ -18,10 +18,21 @@ Two skills are installed in `.claude/skills/`. They are not optional reading.
   GTK change works. `ruby -c` and a successful `require` prove nothing about a
   UI.
 
-## Setup
+## Running and testing
 
-`direnv allow` (or `nix develop`) gets Ruby, GTK4, Libadwaita and the
-introspection typelibs. Then `bundle install`.
+`direnv allow` (or `nix develop`) gets Ruby, GTK4, Libadwaita, librsvg and the
+bundled gems from `gemset.nix`. Regenerate that file with `bundix -l` whenever
+`Gemfile.lock` moves; nix only sees git-tracked files, so `git add` it first.
+
+- `bin/gnome-tour-rb` runs the app.
+- `rake` runs the checks and rubocop. `rake test` alone runs
+  `test/catalogue_test.rb` (no display needed) and `test/drive_tour.rb`, which
+  builds the real window headlessly and writes screenshots to `tmp/shots`.
+
+`PORTING.md` records how this port maps onto the Rust original and the
+ruby-gnome defects found while writing it — read it before changing the
+paginator or the stylesheet loading.
+
 
 ## Style
 

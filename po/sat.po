@@ -1,0 +1,131 @@
+# Santali translation for gnome-tour.
+# Copyright (C) 2026 gnome-tour's COPYRIGHT HOLDER
+# This file is distributed under the same license as the gnome-tour package.
+# Prasanta Hembram <prasantahembram720@gmail.com>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gnome-tour main\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-tour/issues/\n"
+"POT-Creation-Date: 2026-04-03 17:30+0000\n"
+"PO-Revision-Date: 2026-08-20 23:03+0530\n"
+"Last-Translator: Prasanta Hembram <prasantahembram720@gmail.com>\n"
+"Language-Team: Santali\n"
+"Language: sat\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=n==1 ? 0 : n==2 ? 1 : 2;\n"
+"X-Generator: Gtranslator 48.0\n"
+
+#: data/org.gnome.Tour.desktop.in.in:2 data/org.gnome.Tour.metainfo.xml.in.in:7
+#: src/main.rs:26
+msgid "Tour"
+msgstr "ᱫᱟᱲᱟᱱ"
+
+#: data/org.gnome.Tour.desktop.in.in:3
+msgid "Greeter & Tour"
+msgstr "ᱫᱟᱨᱟᱢᱤᱭᱟᱹ ᱟᱨ ᱫᱟᱬᱟᱱ"
+
+#: data/org.gnome.Tour.desktop.in.in:8
+msgid "Gnome;GTK;"
+msgstr "Gnome; GTK;"
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:8
+msgid "GNOME Tour and Greeter"
+msgstr "GNOME ᱫᱟᱬᱟᱱ ᱟᱨ ᱫᱟᱨᱟᱢᱤᱭᱟᱹ"
+
+#: data/org.gnome.Tour.metainfo.xml.in.in:10
+msgid "A guided tour and greeter for GNOME."
+msgstr "GNOME ᱞᱟᱹᱜᱤᱫ ᱢᱤᱫ ᱜᱟᱭᱤᱰ ᱫᱟᱬᱟᱱ ᱟᱨ ᱫᱟᱨᱟᱢᱤᱭᱟᱹ ᱾"
+
+#. developer_name tag deprecated with Appstream 1.0
+#: data/org.gnome.Tour.metainfo.xml.in.in:63
+#: data/org.gnome.Tour.metainfo.xml.in.in:65
+msgid "The GNOME Project"
+msgstr "GNOME ᱯᱟᱱᱛᱷᱟ"
+
+#: data/resources/ui/paginator.ui:25
+msgid "Previous"
+msgstr "ᱞᱟᱦᱟ"
+
+#: data/resources/ui/paginator.ui:38
+msgid "Next"
+msgstr "ᱯᱚᱨᱮ"
+
+#: data/resources/ui/paginator.ui:51
+msgid "Start"
+msgstr "ᱮᱛᱦᱮᱵ"
+
+#: data/resources/ui/window.ui:11
+msgid "Let's Begin"
+msgstr "ᱫᱮᱞᱟ ᱵᱚᱱ ᱮᱦᱚᱵᱟ"
+
+#: data/resources/ui/window.ui:17
+msgid "Get an Overview"
+msgstr "ᱢᱤᱫ ᱧᱮᱞᱵᱤᱰᱟᱹᱣ ᱧᱟᱢ ᱢᱮ"
+
+#. Translators: 'Windows' is referring to the operating system and should not be translated
+#: data/resources/ui/window.ui:18
+msgid ""
+"The overview shows all your apps and windows. Press the Super (Windows) key "
+"to open it."
+msgstr ""
+"ᱢᱟᱲᱟᱝ ᱧᱮᱱᱮᱞ ᱫᱚ ᱟᱢᱟᱜ ᱡᱚᱛᱚ ᱮᱯᱥ ᱠᱚ ᱟᱨ ᱣᱤᱱᱰᱚᱣ ᱠᱚ ᱩᱫᱩᱜ ᱟ᱾ ᱱᱚᱣᱟ ᱡᱷᱤᱡᱽ ᱞᱟᱹᱜᱤᱫ ᱥᱩᱯᱚᱨ "
+"(ᱣᱤᱱᱰᱚᱣᱥ) ᱪᱟᱹᱵᱤ ᱡᱷᱤᱡᱽ ᱢᱮ ᱾"
+
+#: data/resources/ui/window.ui:24
+msgid "Powerful Search"
+msgstr "ᱫᱟᱲᱮᱭᱟᱱ ᱥᱮᱸᱫᱽᱨᱟ"
+
+#: data/resources/ui/window.ui:25
+msgid ""
+"To search, just start typing in the overview. You can use search to launch "
+"apps, find files, perform calculations, and more."
+msgstr ""
+"ᱥᱮᱸᱫᱽᱨᱟ ᱞᱟᱹᱜᱤᱫ, ᱢᱟᱲᱟᱝ ᱧᱮᱱᱮᱞ ᱨᱮ ᱴᱟᱭᱤᱯ ᱮᱦᱚᱵ ᱢᱮ ᱾ ᱟᱢ ᱮᱯᱥ ᱞᱚᱱᱪ, ᱨᱮᱫᱽ ᱠᱚ ᱯᱟᱱᱛᱮ, "
+"ᱞᱮᱠᱷᱟ ᱠᱚᱨᱟᱣ ᱟᱨ ᱟᱭᱢᱟ ᱞᱟᱹᱜᱤᱫ ᱥᱮᱸᱫᱽᱨᱟ ᱵᱮᱵᱷᱟᱨ ᱫᱟᱲᱮᱭᱟᱜᱼᱟᱢ ᱾"
+
+#: data/resources/ui/window.ui:31
+msgid "Stay Organized With Workspaces"
+msgstr "ᱠᱟᱹᱢᱤ ᱴᱷᱟᱶ ᱥᱟᱶ ᱥᱚᱝᱜᱚᱴᱷᱟᱣ ᱛᱟᱦᱮᱱ ᱢᱮ"
+
+#: data/resources/ui/window.ui:32
+msgid ""
+"Organize your windows by moving them into different workspaces. This can be "
+"done by dragging them in the overview."
+msgstr ""
+"ᱟᱢᱟᱜ ᱡᱷᱚᱨᱠᱟ ᱠᱚ ᱮᱴᱟᱜ ᱮᱴᱟᱜ ᱠᱟᱹᱢᱤ ᱴᱷᱟᱶ ᱨᱮ ᱚᱪᱚᱜ ᱠᱟᱛᱮ ᱥᱟᱯᱲᱟᱣ ᱢᱮ ᱾ ᱱᱚᱣᱟ ᱫᱚ ᱩᱱᱠᱩ "
+"ᱢᱟᱲᱟᱝ ᱧᱮᱱᱮᱞ ᱨᱮ ᱚᱨ ᱠᱟᱛᱮ ᱦᱩᱭ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ᱾"
+
+#: data/resources/ui/window.ui:38
+msgid "Swipe Up and Down"
+msgstr "ᱪᱮᱛᱟᱱ ᱟᱨ ᱞᱟᱛᱟᱨ ᱠᱷᱚᱥᱨᱚᱫ ᱢᱮ"
+
+#: data/resources/ui/window.ui:39
+msgid ""
+"To quickly open the overview with a touchpad, swipe up with three fingers."
+msgstr ""
+"ᱴᱟᱪᱯᱮᱰ ᱛᱮ ᱢᱟᱲᱟᱝ ᱧᱮᱱᱮᱞ ᱩᱥᱟᱹᱨᱟ ᱡᱷᱤᱡᱽ ᱞᱟᱹᱜᱤᱫ, ᱯᱮ ᱠᱟᱹᱴᱩᱵ ᱛᱮ ᱪᱮᱛᱟᱱ ᱥᱣᱟᱭᱤᱯ ᱢᱮ ᱾"
+
+#: data/resources/ui/window.ui:45
+msgid "Swipe Left and Right"
+msgstr "ᱞᱮᱸᱜᱟ ᱟᱨ ᱡᱚᱡᱚᱢ ᱥᱣᱟᱭᱤᱯ ᱢᱮ"
+
+#: data/resources/ui/window.ui:46
+msgid "To move between workspaces, swipe three fingers horizontally."
+msgstr "ᱠᱟᱹᱢᱤ ᱴᱷᱟᱶ ᱠᱚ ᱛᱟᱞᱟ ᱨᱮ ᱥᱮᱱᱚᱜ ᱞᱟᱹᱜᱤᱫ, ᱯᱮᱭᱟ ᱠᱟᱹᱴᱩᱵ ᱜᱟᱱᱰᱮ ᱥᱣᱟᱭᱤᱯ ᱢᱮ ᱾"
+
+#: data/resources/ui/window.ui:52
+msgid "That's It!"
+msgstr "ᱚᱱᱟ ᱠᱟᱱᱟ!"
+
+#: data/resources/ui/window.ui:53
+msgid "To get more advice and tips, see the Help app."
+msgstr "ᱵᱟᱹᱲᱛᱤ ᱥᱚᱞᱦᱟ ᱟᱨ ᱴᱤᱯᱥ ᱧᱟᱢ ᱞᱟᱹᱜᱤᱫ, ᱜᱚᱲᱚ ᱮᱯ ᱧᱮᱞ ᱢᱮ ᱾"
+
+#. Translators: The following string is formatted as "Learn about new and essential
+#. features in GNOME 3.36" for example
+#: src/widgets/window.rs:71
+msgid "Learn about the key features in {name} {version}."
+msgstr "{name} {version} ᱨᱮᱱᱟᱜ ᱢᱩᱲᱩᱫ ᱜᱩᱱ ᱠᱚ ᱵᱟᱵᱚᱛ ᱥᱮᱪᱮᱫ ᱢᱮ ᱾"
