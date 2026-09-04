@@ -3,4 +3,8 @@
 
 require_relative '../lib/gnome_tour_rb'
 
-GnomeTourRb::Application.new.build.run
+# `build` answers the Gtk::Application, so the test driver can hang its own
+# handlers off it; running goes through our own object, which passes the
+# command line on to GApplication. Its exit status becomes ours, the way
+# upstream's `main` returns the `glib::ExitCode`.
+exit(GnomeTourRb::Application.new.tap(&:build).run)

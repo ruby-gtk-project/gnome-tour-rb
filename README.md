@@ -41,10 +41,15 @@ rake                  # checks, validation, then rubocop
 `test/catalogue_test.rb` and `test/config_test.rb` cover the parts that need no
 display — the PO reader, the os-release reader, the build-profile constants,
 the logger's level rules and the desktop/metainfo merge.
+`test/cli_test.rb` and `test/quit_test.rb` check the command line and the two
+actions that end the application, each in its own process.
 `test/drive_tour.rb` builds the real window, walks the carousel forward and
 back through the same actions the buttons trigger, and writes screenshots to
 `tmp/shots`. It runs headlessly: GTK4 renders to an offscreen surface, so those
 PNGs are what a real session shows.
+
+`rake hooks` installs the pre-commit hook, which is what upstream's meson does
+for a development build.
 
 ## How it differs from upstream
 

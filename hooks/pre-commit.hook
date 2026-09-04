@@ -1,0 +1,16 @@
+#!/bin/sh
+# Source: the equivalent hook in gnome-tour, with rustfmt swapped for rubocop.
+#
+# Installed by `rake hooks`, the way upstream's meson installs its own when
+# configured with the development profile.
+
+echo "--Checking style--"
+rubocop
+if test $? != 0; then
+    echo "--Checking style fail--"
+    echo "Please fix the above issues, either manually or by running: rubocop -a"
+
+    exit 1
+else
+    echo "--Checking style pass--"
+fi

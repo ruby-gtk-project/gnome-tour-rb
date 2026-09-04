@@ -152,4 +152,5 @@ GtkDriver.drive(app, shots: 'tmp/shots') do |d, _app|
     d.check('previous button is hidden again') { !paginator.call.previous_button.visible? }
     d.shot('05-back-at-welcome')
   end
+
 end

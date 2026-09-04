@@ -91,6 +91,14 @@ segfaults** — not an exception, a `Gdk-CRITICAL` about a null surface followed
 by SIGSEGV inside the introspection loader. `test/drive_tour.rb` builds its
 throwaway devel window and simply leaves it for the application to take down.
 
+**`Gtk::Application#run` needs the program name at the head of the argv it is
+given.** Handed a bare `ARGV` — or the empty list the house entry-point
+convention suggests — GApplication sees no arguments at all and runs normally
+whatever it was asked to do, so `--help` hangs and the D-Bus service file's
+`--gapplication-service` silently launches a full window instead of a service.
+And its return value is the exit status, which the launcher has to pass to
+`exit` itself, the way upstream's `main` returns the `glib::ExitCode`.
+
 **Data files must be read as UTF-8 explicitly.** Ruby decodes with the
 locale's encoding, which is US-ASCII under a bare `LANG=C` — as in a nix build
 sandbox — and every `po/*.po` file then raises `invalid byte sequence in
@@ -102,6 +110,14 @@ gdk-pixbuf, so without librsvg's SVG loader the swipe pages' animated
 backgrounds parse without error and then paint nothing — while the same SVGs
 render fine in a `GtkPicture`, which does not go through gdk-pixbuf. The flake
 puts librsvg in the shell and sets `GDK_PIXBUF_MODULE_FILE`.
+
+## Not ported
+
+Upstream's `build-aux/` holds a cargo vendoring script and a Flatpak manifest
+that builds the Rust crate with meson. The nix flake here covers the same
+ground — `nix build` for the installable app, `nix build .#devel` for the
+development one — so those two are not carried over. Everything else upstream
+ships has an equivalent here.
 
 ## Testing traps
 

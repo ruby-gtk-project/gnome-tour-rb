@@ -51,7 +51,12 @@ module GnomeTourRb
       end
     end
 
-    def run = app.run([])
+    # GApplication parses the command line itself, and the desktop entry
+    # declares DBusActivatable, so the service file's `--gapplication-service`
+    # has to reach it — as do `--help` and the GApplication options. The
+    # program name has to lead, the way it does in a C `argv`; without it
+    # GApplication sees no arguments at all and silently runs as normal.
+    def run(argv = ARGV) = app.run([$PROGRAM_NAME, *argv])
 
     # One window only: re-activating the app raises the existing one.
     def main_window = @main_window ||= Window.new(app)

@@ -2,7 +2,9 @@
 
 desc 'Run the checks: the catalogue, config and os-release readers, then the UI'
 task :test do
-  %w[test/catalogue_test.rb test/config_test.rb test/drive_tour.rb].each do |script|
+  %w[test/catalogue_test.rb test/config_test.rb test/cli_test.rb test/quit_test.rb
+     test/drive_tour.rb
+].each do |script|
     puts "\n== #{script}"
     # No display needed — GTK4 renders the window to an offscreen surface, and
     # the screenshots in tmp/shots come out the same as a real session's.
@@ -21,6 +23,11 @@ task validate: :desktop do
 
   sh 'desktop-file-validate', "data/#{app_id}.desktop"
   sh 'appstreamcli', 'validate', '--no-net', '--explain', "data/#{app_id}.metainfo.xml"
+end
+
+desc 'Install the pre-commit hook (meson does this for a development build)'
+task :hooks do
+  sh 'cp', '-f', 'hooks/pre-commit.hook', '.git/hooks/pre-commit'
 end
 
 desc 'Run the application'

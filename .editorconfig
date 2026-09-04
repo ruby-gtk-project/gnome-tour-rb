@@ -1,0 +1,23 @@
+root = true
+[*]
+indent_style = space
+end_of_line = lf
+trim_trailing_whitespace = true
+insert_final_newline = true
+charset = utf-8
+
+[*.{css,doap,desktop,desktop.in,nix,xml,xml.in,yaml,yml}]
+indent_size = 2
+
+[*.{rb,rake}]
+indent_size = 2
+
+[Gemfile,Rakefile]
+indent_size = 2
+
+[*.json]
+indent_size = 4
+
+[NEWS]
+indent_size = 2
+max_line_length = 72
