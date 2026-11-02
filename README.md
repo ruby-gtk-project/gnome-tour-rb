@@ -13,7 +13,7 @@ desktop entry and in the metainfo.
 
 ```sh
 direnv allow          # or: nix develop
-bin/gnome-tour-rb
+exe/gnome-tour-rb
 ```
 
 `GNOME_TOUR_RB_PROFILE=development` gives the development build: its own

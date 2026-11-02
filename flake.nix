@@ -97,10 +97,16 @@
         typelibPath = pkgs.lib.makeSearchPath "lib/girepository-1.0"
           (map (drv: drv.out or drv) (gtkStack ++ [ pkgs.at-spi2-core ]));
 
+        # nix/ and not the repo root: the root Gemfile is kettle-jem's
+        # development bundle — rubocop, rspec, yard, the kettle-dev stack — and
+        # it pulls its dependencies in through `gemspec`, which bundlerEnv's
+        # store copy of the Gemfile cannot resolve. nix/Gemfile holds the
+        # gemspec's runtime dependencies only, so the launcher's
+        # `-rbundler/setup` has something it can actually load.
         gems = pkgs.bundlerEnv {
           name = "gnome-tour-rb-gems";
           inherit ruby gemConfig;
-          gemdir = ./.;
+          gemdir = ./nix;
         };
 
         # Upstream's meson `profile` option: the development build gets its own
@@ -148,8 +154,8 @@
             mkdir -p $out/share/gnome-tour-rb $out/share/applications \
               $out/share/dbus-1/services
             cp -r lib data po $out/share/gnome-tour-rb/
-            # bin/ has to sit next to lib/ for the launcher's require_relative.
-            install -Dm755 bin/gnome-tour-rb $out/share/gnome-tour-rb/bin/gnome-tour-rb
+            # exe/ has to sit next to lib/ for the launcher's require_relative.
+            install -Dm755 exe/gnome-tour-rb $out/share/gnome-tour-rb/exe/gnome-tour-rb
 
             cp data/${appId}.desktop $out/share/applications/
             sed "s|@BINDIR@|$out/bin|; s|@APP_ID@|${appId}|" data/org.gnome.Tour.Rb.service \
@@ -169,7 +175,7 @@
             makeWrapper ${gems.wrappedRuby}/bin/ruby $out/bin/gnome-tour-rb \
               --add-flags "-rbundler/setup" \
               --set GNOME_TOUR_RB_PROFILE "${profile}" \
-              --add-flags "$out/share/gnome-tour-rb/bin/gnome-tour-rb" \
+              --add-flags "$out/share/gnome-tour-rb/exe/gnome-tour-rb" \
               --set GI_TYPELIB_PATH "${typelibPath}" \
               --set GDK_PIXBUF_MODULE_FILE "${pkgs.librsvg}/lib/gdk-pixbuf-2.0/2.10.0/loaders.cache" \
               --prefix XDG_DATA_DIRS : "$out/share" \
@@ -201,6 +207,10 @@
             pkgs.gsettings-desktop-schemas
             pkgs.desktop-file-utils   # rake validate
             pkgs.appstream            # rake validate
+            # GTK4 refuses to initialise without a display, so the shell
+            # carries one it can start itself: the app and the drivers all run
+            # under `xvfb-run` on a machine with no X session.
+            pkgs.xvfb-run
           ] ++ gtkStack;
 
           # Icons, GSettings schemas and the GTK portal all resolve through
@@ -210,8 +220,9 @@
             export XDG_DATA_DIRS="${pkgs.gsettings-desktop-schemas}/share/gsettings-schemas/${pkgs.gsettings-desktop-schemas.name}:${pkgs.gtk4}/share/gsettings-schemas/${pkgs.gtk4.name}:${pkgs.adwaita-icon-theme}/share:$XDG_DATA_DIRS"
             unset BUNDLE_GEMFILE BUNDLE_FROZEN BUNDLE_PATH
             echo "gnome-tour-rb devshell — ruby $(ruby -e 'print RUBY_VERSION')"
-            echo "  ./bin/gnome-tour-rb   run the app"
-            echo "  rake                  test + lint"
+            echo "  xvfb-run ruby exe/gnome-tour-rb   run the app"
+            echo "  xvfb-run ruby test/drive_tour.rb  drive the tour"
+            echo "  rake                              test + lint"
           '';
         };
       });

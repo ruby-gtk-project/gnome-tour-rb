@@ -24,13 +24,14 @@ Two skills are installed in `.claude/skills/`. They are not optional reading.
 bundled gems from `gemset.nix`. Regenerate that file with `bundix -l` whenever
 `Gemfile.lock` moves; nix only sees git-tracked files, so `git add` it first.
 
-- `bin/gnome-tour-rb` runs the app. `GNOME_TOUR_RB_PROFILE=development` gives
+- `exe/gnome-tour-rb` runs the app. `GNOME_TOUR_RB_PROFILE=development` gives
   the devel build (own app id, `devel` header); `GNOME_TOUR_RB_LOG=info` or
   `G_MESSAGES_DEBUG=gnome_tour_rb` turns on logging.
-- `rake` runs the checks, the desktop/metainfo validation and rubocop.
-  `test/catalogue_test.rb` and `test/config_test.rb` need no display;
-  `test/drive_tour.rb` builds the real window headlessly and writes
-  screenshots to `tmp/shots`.
+- `rake` runs the checks, the desktop/metainfo validation and rubocop. Only
+  `test/catalogue_test.rb` and `test/config_test.rb` run without a display;
+  everything else loads `gtk4`, which runs gtk_init on require, so on a
+  headless machine run `xvfb-run rake`. `test/drive_tour.rb` builds the real
+  window and writes screenshots to `tmp/shots`.
 - `rake desktop` regenerates the desktop entry and metainfo from `po/`. They
   are build outputs, not tracked — the nix build makes its own.
 - `nix build` produces the installable app, `nix build .#devel` the devel one.

@@ -144,15 +144,8 @@ anywhere: `last-page` (upstream sets it for the benefit of outside styling).
 
 ## Gaps
 
-The port has full component parity with upstream. The only discrepancy is in
-the other direction — extra components with no upstream counterpart:
-
-| Port file | What it is | Verdict |
-|---|---|---|
-| `lib/gnome_tour/application.rb` | the original scaffold: `Adwaita::ApplicationWindow` + `Adwaita::ToolbarView` + `Adwaita::HeaderBar` + `Adwaita::StatusPage` reading "The Ruby port has not been written yet." | dead scaffold, superseded by `lib/gnome_tour_rb/` |
-| `lib/gnome_tour.rb` | requires the scaffold | dead |
-| `exe/gnome-tour` | launches the scaffold | dead; `exe/gnome-tour-rb` is the real entry point |
-
-Nothing in `lib/gnome_tour_rb/` requires them, and they are not in
-`po/POTFILES.in`. They should be deleted in a follow-up step so the app has
-one entry point.
+The port has full component parity with upstream, in both directions: every
+upstream unit has a port file, and there are no port files without an upstream
+counterpart. The original scaffold (`lib/gnome_tour.rb`,
+`lib/gnome_tour/application.rb`, `exe/gnome-tour`) has been deleted, so the app
+has one entry point — `exe/gnome-tour-rb` → `lib/gnome_tour_rb.rb`.

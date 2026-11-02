@@ -4,7 +4,12 @@
 # makes the app run normally whatever it was asked to do, so the desktop
 # entry's DBusActivatable would launch a full window instead of a service.
 #
-#   ruby test/cli_test.rb
+# A display is needed even for `--help`: `require 'gtk4'` runs gtk_init, so the
+# bindings open the display before GApplication ever sees the arguments. Hence
+# the launcher inherits this process's display rather than being run without
+# one.
+#
+#   xvfb-run ruby test/cli_test.rb
 
 require 'open3'
 
@@ -19,15 +24,10 @@ def check(description)
   end
 end
 
-LAUNCHER = File.expand_path('../bin/gnome-tour-rb', __dir__)
+LAUNCHER = File.expand_path('../exe/gnome-tour-rb', __dir__)
 
 def launch(*args)
-  Open3.capture3(
-    { 'DISPLAY' => nil, 'WAYLAND_DISPLAY' => nil },
-    RbConfig.ruby,
-    LAUNCHER,
-    *args,
-  )
+  Open3.capture3(RbConfig.ruby, LAUNCHER, *args)
 end
 
 out, _err, status = launch('--help')

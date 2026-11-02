@@ -171,6 +171,9 @@ rescue LoadError
   end
 end
 desc 'Run the checks: the catalogue, config and os-release readers, then the UI'
+# The UI checks need a display: `require 'gtk4'` runs gtk_init, so the bindings
+# open one before any of our code runs. On a machine with no X session, run the
+# whole task under a virtual one — `xvfb-run rake test`.
 task :test do
   %w[
     test/catalogue_test.rb
@@ -181,9 +184,7 @@ task :test do
     test/locale_test.rb
   ].each do |script|
     puts "\n== #{script}"
-    # No display needed — GTK4 renders the window to an offscreen surface, and
-    # the screenshots in tmp/shots come out the same as a real session's.
-    sh({ 'DISPLAY' => nil, 'WAYLAND_DISPLAY' => nil }, 'ruby', script)
+    sh('ruby', script)
   end
 end
 
@@ -207,7 +208,7 @@ end
 
 desc 'Run the application'
 task :run do
-  sh 'bin/gnome-tour-rb'
+  sh 'exe/gnome-tour-rb'
 end
 
 desc 'Lint'
