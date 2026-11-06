@@ -163,4 +163,44 @@ GtkDriver.drive(app, shots: 'tmp/shots', interval: 100, timeout: 600) do |d, _ap
     d.shot('05-back-at-welcome')
   end
 
+  # A second, independent window exercises win.next-page's close behaviour
+  # without quitting the whole app out from under the remaining steps — the
+  # main window stays open, so the application's window count never drops to
+  # zero and the main loop keeps running.
+  d.step('win.next-page on the last page closes the window') do
+    GnomeTourRb::Window.new(app.app).tap do |second|
+      second.build
+      second.present
+
+      second.paginator.set_page(6)
+      settle(second.paginator, 6)
+      d.check('second window reached the last page') { second.paginator.current_page == 6 }
+
+      second.window.activate_action('next-page', nil)
+      5.times { GLib::MainContext.default.iteration(false) }
+
+      d.check('the window closes') { !second.window.visible? }
+    end
+  end
+
+  # The true last step: win.skip-tour quits the application directly
+  # (bypassing the paginator entirely), so nothing can run after it. `quit`
+  # only actually tears the main loop down once we return to GLib's own
+  # dispatcher — which this very step is running inside of — so there is no
+  # later tick left in this run to observe that from the outside. What we can
+  # observe from here, synchronously, is whether activating the action called
+  # `application.quit` at all.
+  quit_called = false
+  original_quit = app.app.method(:quit)
+  app.app.define_singleton_method(:quit) do
+    quit_called = true
+    original_quit.call
+  end
+
+  d.step('win.skip-tour quits the application') do
+    window.call.window.activate_action('skip-tour', nil)
+
+    d.check('activating it called application.quit') { quit_called }
+  end
+
 end
