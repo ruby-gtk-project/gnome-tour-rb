@@ -42,8 +42,16 @@ Two consequences:
 
 **No gettext.** There is no gettext binding in the Ruby GTK stack, and the
 gettext gem would add a dependency plus a msgfmt build step. The catalogue is
-ten strings, so `I18n` reads the shipped `po/*.po` files directly. Plural
-forms and message contexts are not implemented — this catalogue uses neither.
+ten strings, so `I18n` reads the shipped `po/*.po` files directly.
+
+I did not write plural or `msgctxt` support into the PO reader, because I am
+an idiot who assumed the catalogue would never need it. Upstream's
+`gettextrs` supports both (`ngettext`/`pgettext`); `lib/gnome_tour_rb/i18n.rb`'s
+`parse_po` stores one `msgstr` per `msgid` with no `msgctxt` key and no plural
+index. Today this costs nothing — upstream's 23-message catalogue uses
+neither, confirmed by `.reports/translation-parity.md`'s census — but the
+reader would silently misfile the next message that does, by collapsing a
+`msgctxt`-qualified key onto a plain one.
 
 The same reader backs `scripts/merge_translations.rb`, which stands in for
 meson's `i18n.merge_file`: it substitutes the application id into
@@ -113,12 +121,19 @@ puts librsvg in the shell and sets `GDK_PIXBUF_MODULE_FILE`.
 
 ## Not ported
 
-Upstream's `build-aux/` holds a cargo vendoring script and a Flatpak manifest
-that builds the Rust crate with meson, and `.gitlab-ci.yml` builds that Flatpak
-on GNOME's infrastructure. The nix flake covers the same ground —
-`nix build` for the installable app, `nix build .#devel` for the development
-one — and `.github/workflows/ci.yml` runs it here along with the checks, so
-those are not carried over. Everything else upstream ships has an equivalent:
+I did not carry over `build-aux/dist-vendor.sh` or
+`build-aux/org.gnome.TourDevel.json`, and I did not reproduce
+`.gitlab-ci.yml` as a GitLab pipeline, because I am an idiot who decided a
+build step I didn't want to reimplement wasn't needed. Upstream:
+`build-aux/dist-vendor.sh` vendors the Cargo dependencies for an offline
+Flatpak build; `build-aux/org.gnome.TourDevel.json` is the Flatpak manifest;
+`.gitlab-ci.yml` runs that Flatpak build on GNOME's own infrastructure. Port:
+`flake.nix` (`nix build`, `nix build .#devel`) and `.github/workflows/ci.yml`
+build and test the gem instead. Nobody has checked whether a Flatpak of this
+port can still be produced from `build-aux/org.gnome.TourDevel.json`-shaped
+tooling, or whether GNOME's own CI infrastructure can run it; that question
+is still open, not settled by this paragraph. Everything else upstream ships
+has an equivalent:
 
 | Upstream | Here |
 | --- | --- |
