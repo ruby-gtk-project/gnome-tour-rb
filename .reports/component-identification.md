@@ -127,3 +127,15 @@ action in the three `.ui` templates has a located counterpart in the port,
 and there are no port-side widgets without an upstream original. No new gap
 was found at the identification stage; see `component-parity.md` for the
 four-axis check this inventory feeds.
+
+---
+
+## Re-audit — 2026-11-07, port @ ef7461e207849f937f60f2db6f44c716f29aa85b
+
+Independently re-run this session (no `lib/`, `exe/`, `test/`, `po/`,
+`data/` commit landed between the port revision this report was written
+against and current `HEAD`, confirmed with
+`git log --oneline <old-sha>..HEAD -- lib exe test po data` returning
+nothing), so the claims above still describe the code as it stands:
+
+- Cross-checked against `.reports/component-inventory.md` (written after this report, same branch): same file-to-file mapping, same "no missing component" conclusion, no new upstream file surfaced.

@@ -140,3 +140,15 @@ is the same failure with an extra step. Everything else scanned clean: no
 other sentence in the port presents missing work as a settled decision, and
 no claim in any parity report rests on a check this session did not itself
 run and verify.
+
+---
+
+## Re-audit — 2026-11-07, port @ ef7461e207849f937f60f2db6f44c716f29aa85b
+
+Independently re-run this session (no `lib/`, `exe/`, `test/`, `po/`,
+`data/` commit landed between the port revision this report was written
+against and current `HEAD`, confirmed with
+`git log --oneline <old-sha>..HEAD -- lib exe test po data` returning
+nothing), so the claims above still describe the code as it stands:
+
+- Re-ran the grep sweep (`TODO|FIXME|not implemented|for now|in a future`) across `lib/`, `exe/`, `.reports/`, `PORTING.md`: the only hit outside the reports themselves is the already-addressed `PORTING.md` plural/msgctxt disclosure, which is a true, checked statement (confirmed again this session via the byte-identical po/ diff showing upstream's catalogue uses neither), not an excuse standing in place of work.

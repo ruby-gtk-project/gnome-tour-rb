@@ -129,3 +129,15 @@ key** — not just that the merge runs, but that every language survives it.
 unchanged, and the result is driven under a non-English locale rather than
 only asserted statically.** No gap found on any of the three claims this
 skill defines.
+
+---
+
+## Re-audit — 2026-11-07, port @ ef7461e207849f937f60f2db6f44c716f29aa85b
+
+Independently re-run this session (no `lib/`, `exe/`, `test/`, `po/`,
+`data/` commit landed between the port revision this report was written
+against and current `HEAD`, confirmed with
+`git log --oneline <old-sha>..HEAD -- lib exe test po data` returning
+nothing), so the claims above still describe the code as it stands:
+
+- Re-diffed `po/de.po`, `po/fr.po` and `po/LINGUAS` against `origin/main` with `diff -q`: byte-identical, confirming the 23/23, 63/63 claim still holds.

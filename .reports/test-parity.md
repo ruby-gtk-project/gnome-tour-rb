@@ -88,3 +88,15 @@ six separate files exercising every unit named in `component-parity.md`
 config/profile, CLI argument handling, quit paths), and was executed in
 full this session with every check green — not inferred from the narrower
 43-check gate alone.
+
+---
+
+## Re-audit — 2026-11-07, port @ ef7461e207849f937f60f2db6f44c716f29aa85b
+
+Independently re-run this session (no `lib/`, `exe/`, `test/`, `po/`,
+`data/` commit landed between the port revision this report was written
+against and current `HEAD`, confirmed with
+`git log --oneline <old-sha>..HEAD -- lib exe test po data` returning
+nothing), so the claims above still describe the code as it stands:
+
+- Reran `nix develop --command xvfb-run -a rake test` in full: all six files green, including `43 of 43 checks passed, DRIVE OK` (`drive_tour.rb`) and `11 of 11 checks passed, DRIVE OK` (`locale_test.rb`). This matches the round's runtime gate (43 passed, 0 failed) and shows it is reproducible, not a one-off.

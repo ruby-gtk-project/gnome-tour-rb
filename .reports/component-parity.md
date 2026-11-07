@@ -157,3 +157,15 @@ is one window, one carousel, seven pages, four `win.` actions and one
 `app.quit`. There is no empty state and no error state in the upstream app
 to check parity against (a tour has nothing to be empty or fail); this is a
 fact about the upstream app, not an omission in the port.
+
+---
+
+## Re-audit — 2026-11-07, port @ ef7461e207849f937f60f2db6f44c716f29aa85b
+
+Independently re-run this session (no `lib/`, `exe/`, `test/`, `po/`,
+`data/` commit landed between the port revision this report was written
+against and current `HEAD`, confirmed with
+`git log --oneline <old-sha>..HEAD -- lib exe test po data` returning
+nothing), so the claims above still describe the code as it stands:
+
+- Re-diffed `data/style.css` against `git show origin/main:data/resources/style.css`: the only differences are the two documented `@ASSETS@` substitutions for the GResource path, nothing else drifted.
