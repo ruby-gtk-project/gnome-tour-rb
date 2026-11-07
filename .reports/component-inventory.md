@@ -1,151 +1,210 @@
-# gnome-tour-rb — upstream component inventory
+# Component inventory — gnome-tour-rb
 
-Upstream ref: `origin/main` (GNOME Tour, Rust/gtk-rs). Port branch: `ruby`.
+Upstream: `origin/main` (Rust/gtk-rs, GResource-backed). Port: `ruby` branch,
+`lib/gnome_tour_rb/`.
 
-Upstream is a gtk-rs app with three `GtkBuilder` templates. Every component is
-split across a `.rs` subclass and a `.ui` tree, so the rows below are the union
-of both halves (see `component-identification`, "the component is the set of
-files"). There is **no** GSettings schema, no preferences dialog, no about
-dialog, no shortcuts window, no menu model and no primary menu anywhere in
-upstream — the whole app is one window, one carousel, seven pages and four
-`win.` actions.
+One section per upstream component (source file + its `.ui`, where split
+across two files, counted as one unit per the `component-identification`
+skill). For each: the widget tree, CSS classes, signals, actions, and the
+`lib/*.rb` file it maps to on the port side, with existence noted.
 
-## Unit map
+## Application — `src/application.rs`, `src/main.rs` → `lib/gnome_tour_rb/application.rb`
+
+**EXISTS.**
+
+| Facet | Upstream | Port |
+|---|---|---|
+| Type | `Application(adw::Application)` | `Application` wrapping `Gtk::Application` |
+| Actions | `app.quit` (accel `<Control>q`), `win.skip-tour` accel `Escape` (installed on the window class, accel set here) | `app.quit` action + both accels set in `startup` |
+| Lifecycle | `startup`: none beyond parent; `activate`: raise existing window or build+present | `startup`: `Adwaita.init`, register icon search path, load stylesheet, install `quit` action, set accels; `activate`: build on first run, else raise, then present |
+| Resources | Loads compiled GResource (`config::RESOURCES_FILE`), registers it | No GResource; reads `data/` directly via `Paths` — icons via `IconTheme#add_search_path`, stylesheet read and `@ASSETS@`-substituted |
+| Logging | `env_logger` + `G_MESSAGES_DEBUG` compat (`src/main.rs`) | `lib/gnome_tour_rb/log.rb` — present, same compat rule |
+| i18n setup | `gettextrs` `bindtextdomain`/`textdomain`, `glib::set_application_name` | `lib/gnome_tour_rb/i18n.rb` (own PO reader) + `GLib.application_name = _('Tour')` in `Application#build` |
+
+Notes: no widget tree of its own (not a `Gtk.Widget`), so no CSS/signal rows
+beyond the two actions and the `startup`/`activate` handlers noted above.
+Full parity — nothing upstream does here is missing on the port.
+
+## Window — `src/widgets/window.rs` + `data/resources/ui/window.ui` → `lib/gnome_tour_rb/window.rb`
+
+**EXISTS.**
+
+| Widget | × | CSS | Signals/handlers | Notes |
+|---|---:|---|---|---|
+| `Adw.ApplicationWindow` (template root `Window`) | 1 | `devel` (profile == Devel only) | `constructed`: sets icon-name, devel class, welcome body | default size 960×720; port: `Adwaita::ApplicationWindow.new`, `set_default_size`, `icon_name=`, conditional `devel` class |
+| `PaginatorWidget` (content) | 1 | — | — | → `Paginator` (see below), set as `win.content=` |
+| `ImagePageWidget` (child of paginator) | 7 | `last-page` on the 7th only | — | → `ImagePage`, one per `PAGES` entry |
+
+Actions installed on the window class (`win.` prefix):
+
+| Action | Upstream handler | Port | Present |
+|---|---|---|---|
+| `win.start-tour` | `win.start_tour()` → `paginator.set_page(1)` | `install_actions['start-tour']` → `start_tour` → `paginator.set_page(1)` | yes |
+| `win.skip-tour` | `application.quit()` | `install_actions['skip-tour']` → `application.quit` | yes |
+| `win.next-page` | `paginator.try_next` else `win.close()` | `install_actions['next-page']` → `next_page` → same | yes |
+| `win.previous-page` | `paginator.try_previous` else `reset_tour` (`set_page(0)`) | `install_actions['previous-page']` → `previous_page` → same | yes |
+
+Accel: `win.skip-tour` → `Escape`, set in `Application#startup`. Present.
+
+Welcome-page body string: `"Learn about the key features in {name} {version}."`
+filled from `glib::os_info("NAME"/"VERSION")` upstream, `OsInfo.name`/`.version`
+in the port (`lib/gnome_tour_rb/os_info.rb`, present — reads `/etc/os-release`).
+
+Full parity.
+
+## Paginator — `src/widgets/paginator.rs` + `data/resources/ui/paginator.ui` → `lib/gnome_tour_rb/paginator.rb`
+
+**EXISTS.**
+
+| Widget | × | CSS | Signals | Notes |
+|---|---:|---|---|---|
+| `Adw.Bin` (template root `PaginatorWidget`) | 1 | — | — | port: `Adwaita::Bin` |
+| `Adw.ToolbarView` | 1 | — | — | top bar + content |
+| `Gtk.HeaderBar` | 1 | — | — | `title-widget` = carousel dots |
+| `Adw.CarouselIndicatorDots` | 1 | — | — | bound to carousel |
+| `Gtk.Overlay` (`previous_overlay`) | 1 | — | — | `valign: center` |
+| `Gtk.Button` (`previous_btn`) | 1 | `circular` | `clicked` via `action-name=win.previous-page` | tooltip "Previous" (translatable) |
+| `Gtk.Button` (`next_btn`) | 1 | `circular` | `action-name=win.next-page` | tooltip "Next" |
+| `Gtk.Button` (`start_btn`) | 1 | `circular`, `suggested-action` | `action-name=win.start-tour` | tooltip "Start" |
+| `Adw.Carousel` | 1 | — | `notify::position` → `on_position_notify` | `scroll-params` set in code to `Adw::SpringParams(1.0, 0.5, 300.0)` |
+| `Gtk.EventControllerKey` (controller, not a widget) | 1 | — | `key-pressed` → `on_key_pressed` | arrow-key nav |
+
+Port mapping: `bin`→`Adwaita::Bin`, `toolbar_view`→`Adwaita::ToolbarView`,
+`header_bar`→`Gtk::HeaderBar`, `carousel_dots`→`Adwaita::CarouselIndicatorDots`,
+`overlay`→`Gtk::Overlay`, `previous_button`/`next_button`/`start_button`→
+`Gtk::Button` via shared `nav_button` factory (3 call sites — 3 widgets, per
+the skill's factory-counting rule), `carousel`→`Adwaita::Carousel`,
+`key_controller`→`Gtk::EventControllerKey`. All signal connections present:
+`notify::position` and `key-pressed` both wired in `#build`.
+
+Behaviour: `try_next`/`try_previous`/`set_page`, direction-tracking
+(`remember_direction`/`focus_button`), the three-way opacity cross-fade
+(`opacities`/`apply_opacities`/`fade`), and the "next button not targetable
+while settling onto the last page" rule are all transcribed
+(`lib/gnome_tour_rb/paginator.rb`, matches `on_position_notify`/`try_next`/
+`try_previous`/`set_page` in `src/widgets/paginator.rs`).
+
+Full parity.
+
+## Image page — `src/widgets/image_page.rs` + `data/resources/ui/image-page.ui` → `lib/gnome_tour_rb/image_page.rb`
+
+**EXISTS** (as `ImagePage`, a plain class rather than upstream's
+`GtkWidget` subclass with an `AdwClampLayout` — a declared, documented
+divergence in `PORTING.md`; the `page` CSS class and clamp constraint are
+preserved via `Adwaita::Clamp`).
+
+| Widget | × | CSS | Notes |
+|---|---:|---|---|
+| Root (`ImagePageWidget` template, parent `GtkWidget` + `AdwClampLayout`) | 1 | `page` | port: `Adwaita::Clamp` carrying `page` (+ `halign/valign: fill`, `hexpand/vexpand: true`) |
+| `Gtk.Box` (`container`) | 1 | — | vertical, spacing 12, centered, margins (top 12, bottom 48, start/end 12) |
+| `Gtk.Picture` (`picture`) | 1 | — | `can-shrink: true`, `content-fit: contain`, bound to `resource-uri`/`asset` |
+| `Gtk.Label` (`head_label`) | 1 | `title-1` | bound to `head` property; `margin-top: 36` |
+| `Gtk.Label` (body, unnamed) | 1 | `body` | bound to `body` property; `lines: 2`, `wrap: true`, `margin-top: 12` |
+
+Properties: `resource-uri`/`asset` (construct-only), `head` (construct-only),
+`body` (construct, settable after construction — upstream via GObject
+property notify/bind, port via `ImagePage#body=` plus an explicit
+`body_label.label = text` — used once, for the welcome page's runtime body).
+
+Full parity.
+
+## `.ui` files — `data/resources/ui/{window,paginator,image-page}.ui`
+
+All three folded into their owning Ruby class above (house style: no `.ui`
+files in the port, declarative trees are built in code). No standalone
+template or menu with no backing class — none exists upstream for this app.
+
+## Stylesheet — `data/resources/style.css` → `data/style.css`
+
+**EXISTS**, carried over with one divergence: upstream's `url(...)` refs are
+absolute GResource paths (`/org/gnome/Tour/hand-fg.svg` etc.); the port's copy
+uses an `@ASSETS@` token substituted for a `file://` URI by
+`Application#stylesheet_source` (no GResource on this side). Classes/rules:
+`.page:nth-child(5)` (up-down hand animation) and `.page:nth-child(6)`
+(left-right hand animation), both present; the two commented-out gradient
+rules for `nth-child(2)`/`nth-child(4)` are dead code upstream and correctly
+not reproduced.
+
+## GSettings schemas
+
+**None upstream.** `gnome-tour` ships no GSettings schema (confirmed: no
+`data/*.gschema.xml.in` in `git ls-tree -r --name-only origin/main`). Nothing
+to port; no gap.
+
+## GResource manifest — `data/resources.gresource.xml`
+
+**No port equivalent by design** (`PORTING.md`: "No GResource. Artwork, icons
+and the stylesheet are read from `data/`"). Every file it lists is accounted
+for individually below rather than through a resource bundle:
+
+| GResource entry | Port location | Present |
+|---|---|---|
+| `style.css` | `data/style.css` | yes |
+| `ui/{image-page,paginator,window}.ui` | folded into `lib/gnome_tour_rb/{image_page,paginator,window}.rb` | yes (as code, not `.ui`) |
+| `{welcome,overview,search,blank,workspaces,ready-to-go}.svg` | `data/assets/*.svg` | yes, all 6 present |
+| `hand-fg.svg`, `updown-bg.svg`, `leftright-bg.svg` | `data/assets/*.svg` | yes, all 3 present |
+| `prev-large-symbolic{,-rtl}.svg`, `next-large-symbolic{,-rtl}.svg` (aliases of `left-large-symbolic.svg`/`right-large-symbolic.svg`) | `data/icons/hicolor/...` | present as a `hicolor` icon theme dir, registered via `IconTheme#add_search_path` in `Application#register_icons` — RTL variants resolved by the icon theme rather than by alias, per `PORTING.md` |
+
+## Desktop entry, metainfo, D-Bus service
+
+| Upstream | Port | Present |
+|---|---|---|
+| `data/org.gnome.Tour.desktop.in.in` | `data/org.gnome.Tour.Rb.desktop.in` | yes, own app id suffix `.Rb` |
+| `data/org.gnome.Tour.metainfo.xml.in.in` | `data/org.gnome.Tour.Rb.metainfo.xml.in` | yes |
+| `data/org.gnome.Tour.service.in` | `data/org.gnome.Tour.Rb.service` | yes |
+| meson `i18n.merge_file` (translates `Name=`/`<name>` etc. into both) | `scripts/merge_translations.rb`, run via `rake desktop` | yes, per `PORTING.md` |
+
+## Keyboard shortcuts
+
+| Shortcut | Upstream | Port |
+|---|---|---|
+| `<Control>q` | `app.quit` | present, `Application#build` |
+| `Escape` | `win.skip-tour` | present, `Application#build` |
+| `Left`/`Right` arrow (carousel, via `EventControllerKey`) | `Paginator`/`PaginatorWidget` `on_key_pressed` | present, `Paginator#on_key_pressed` |
+
+No shortcuts dialog/window exists upstream for this app (it is a 3-window-action
+greeter, not a full app), so none is expected on the port side — confirmed
+absent from `git ls-tree -r --name-only origin/main` (no `shortcuts*.ui`/`.blp`).
+
+## Dialogs, preferences, menus, empty/error states
+
+**None exist upstream.** `gnome-tour` has no preferences dialog, no menu
+model, no empty-state or error-state UI — it is a single window with one
+child widget tree (paginator → 7 image pages) and no secondary surfaces.
+Confirmed by the full `git ls-tree -r --name-only origin/main` listing above:
+the only UI-bearing files are the three `.ui` files already covered. Nothing
+missing because nothing exists to miss.
+
+## Summary table
 
 | Upstream file(s) | Port file | Kind | Exists |
 |---|---|---|---|
-| `src/main.rs` | `lib/gnome_tour_rb.rb`, `exe/gnome-tour-rb` | entry point | yes |
-| `src/main.rs` (gettext/locale block) | `lib/gnome_tour_rb/i18n.rb` | i18n bootstrap | yes |
-| `src/main.rs` (`env_logger`, `log::info!`) | `lib/gnome_tour_rb/log.rb` | logging | yes |
-| `src/application.rs` | `lib/gnome_tour_rb/application.rb` | application | yes |
-| `src/widgets/window.rs` + `data/resources/ui/window.ui` | `lib/gnome_tour_rb/window.rb` | window | yes |
-| `src/widgets/paginator.rs` + `data/resources/ui/paginator.ui` | `lib/gnome_tour_rb/paginator.rb` | composite widget | yes |
-| `src/widgets/image_page.rs` + `data/resources/ui/image-page.ui` | `lib/gnome_tour_rb/image_page.rb` | page widget | yes |
-| `src/config.rs.in` + `src/meson.build` | `lib/gnome_tour_rb/config.rb` | build constants | yes |
-| `glib::os_info` (no Ruby binding) | `lib/gnome_tour_rb/os_info.rb` | support | yes |
-| `data/resources.gresource.xml` | `lib/gnome_tour_rb/paths.rb` | resource lookup | yes |
+| `src/application.rs`, `src/main.rs` | `lib/gnome_tour_rb/application.rb` | application class | yes |
+| `src/widgets/window.rs` + `ui/window.ui` | `lib/gnome_tour_rb/window.rb` | window | yes |
+| `src/widgets/paginator.rs` + `ui/paginator.ui` | `lib/gnome_tour_rb/paginator.rb` | composite widget | yes |
+| `src/widgets/image_page.rs` + `ui/image-page.ui` | `lib/gnome_tour_rb/image_page.rb` | composite widget | yes |
+| `src/config.rs.in` + meson `profile` option | `lib/gnome_tour_rb/config.rb` | config/build-time constants | yes |
+| `src/main.rs` (env_logger setup) | `lib/gnome_tour_rb/log.rb` | logging | yes |
+| `gettextrs` usage throughout | `lib/gnome_tour_rb/i18n.rb` | i18n | yes |
+| `glib::os_info` calls in `window.rs` | `lib/gnome_tour_rb/os_info.rb` | OS info helper | yes |
+| (no upstream equivalent — GResource replaced by disk paths) | `lib/gnome_tour_rb/paths.rb` | path helper | yes |
 | `data/resources/style.css` | `data/style.css` | stylesheet | yes |
-| `data/resources/assets/*.svg` (9) | `data/assets/*.svg` (9) | artwork | yes |
-| `data/resources/{left,right}-large-symbolic.svg` | `data/icons/hicolor/scalable/actions/{prev,next}-large-symbolic{,-rtl}.svg` | icons | yes |
-| `data/icons/org.gnome.Tour*.svg` | `data/icons/hicolor/scalable/apps/org.gnome.Tour.Rb*.svg` | app icons | yes |
-| `data/org.gnome.Tour.desktop.in.in` | `data/org.gnome.Tour.Rb.desktop.in` | desktop entry | yes |
-| `data/org.gnome.Tour.metainfo.xml.in.in` | `data/org.gnome.Tour.Rb.metainfo.xml.in` | appstream | yes |
-| `data/org.gnome.Tour.service.in` | `data/org.gnome.Tour.Rb.service` | D-Bus activation | yes |
-| `po/` (63 locales + `LINGUAS`) | `po/` (63 locales, `LINGUAS` identical) | catalogue | yes |
+| `data/*.desktop.in.in`, `*.metainfo.xml.in.in`, `*.service.in` | `data/org.gnome.Tour.Rb.*` | packaging metadata | yes |
+| `po/*.po` (65 languages incl. source strings) | `po/*.po` (65 present) | translation catalogue | yes — count matches; full `msgid`-level census is `translation-parity`'s job, not repeated here |
+| (none upstream: no gschema, no shortcuts window, no preferences dialog, no menu model) | — | — | n/a — nothing to port |
 
-## src/application.rs — the application object
+## Bottom line
 
-| Widget / object | × | CSS | Signals | Notes |
-|---|---:|---|---|---|
-| `Adw.Application` | 1 | — | `activate`, `startup` | port uses `Gtk::Application` + explicit `Adwaita.init` (`Adwaita::Application` is broken in the bindings) |
-
-Actions: `app.quit`. Accelerators: `app.quit` → `<Control>q`;
-`win.skip-tour` → `Escape`. `resource-base-path` `/org/gnome/Tour`.
-`activate` presents the existing window rather than building a second one.
-
-Port additions with no upstream counterpart, forced by having no GResource:
-`register_icons` (`Gtk::IconTheme` search path) and `load_stylesheet`
-(`Gtk::CssProvider` at `PRIORITY_APPLICATION`, with `@ASSETS@` substituted to
-absolute `file://` URIs).
-
-## src/widgets/window.rs + data/resources/ui/window.ui — the tour window
-
-| Widget | × | CSS | Signals | Notes |
-|---|---:|---|---|---|
-| `Adw.ApplicationWindow` | 1 | `devel` (only when `PROFILE == "Devel"`) | — | 960×720, `icon-name` = app id |
-| `PaginatorWidget` | 1 | — | — | the window's `content`; app-defined template |
-| `ImagePageWidget` | 7 | `last-page` (7th only) | — | repeater over the seven page definitions |
-
-Actions installed: `win.start-tour` (→ page 1), `win.skip-tour` (→ app quit),
-`win.next-page` (→ `try_next`, closes the window on `None`),
-`win.previous-page` (→ `try_previous`, resets to page 0 on `None`).
-
-The seven pages, in carousel order — asset, head, body:
-
-1. `welcome.svg` — "Let's Begin" — body set at runtime from
-   `"Learn about the key features in {name} {version}."` with `glib::os_info`
-   `NAME`/`VERSION` (fallbacks `GNOME` / empty)
-2. `overview.svg` — "Get an Overview"
-3. `search.svg` — "Powerful Search"
-4. `workspaces.svg` — "Stay Organized With Workspaces"
-5. `blank.svg` — "Swipe Up and Down" (background supplied by `.page:nth-child(5)`)
-6. `blank.svg` — "Swipe Left and Right" (`.page:nth-child(6)`)
-7. `ready-to-go.svg` — "That's It!" — `last-page`
-
-Port: the pages live in a frozen `PAGES` constant and are mapped to
-`ImagePage` instances, so the seven are a repeater rather than seven literals.
-
-## src/widgets/paginator.rs + data/resources/ui/paginator.ui — carousel and navigation
-
-| Widget | × | CSS | Signals | Notes |
-|---|---:|---|---|---|
-| `Adw.Bin` | 1 | — | — | template root; carries the key controller |
-| `Adw.ToolbarView` | 1 | — | — | header bar on top, overlay as content |
-| `Gtk.HeaderBar` | 1 | — | — | `title-widget` is the dot indicator |
-| `Adw.CarouselIndicatorDots` | 1 | — | — | bound to the carousel |
-| `Gtk.Overlay` (`previous_overlay`) | 1 | — | — | `valign: center` |
-| `Gtk.Button` (`previous_btn`) | 1 | `circular` | — | `prev-large-symbolic`, tooltip "Previous", `win.previous-page`, `halign: start`, `margin-start: 12` |
-| `Gtk.Button` (`next_btn`) | 1 | `circular` | — | `next-large-symbolic`, tooltip "Next", `win.next-page`, `halign: end`, `margin-end: 12` |
-| `Gtk.Button` (`start_btn`) | 1 | `circular`, `suggested-action` | — | `next-large-symbolic`, tooltip "Start", `win.start-tour`, `halign: end`, `margin-end: 12` |
-| `Adw.Carousel` | 1 | — | `notify::position` → `on_position_notify` | `hexpand`/`vexpand`, `SpringParams(1.0, 0.5, 300.0)` |
-| `Gtk.EventControllerKey` | 1 (controller) | — | `key-pressed` → `on_key_pressed` | `Right` → next, `Left` → previous, always propagates |
-
-Repeaters: the carousel's pages (7, inserted by the window via `add_page`).
-
-Behaviour that is part of the component, not decoration:
-
-- `on_position_notify` cross-fades the three buttons against the carousel's
-  *fractional* position, so they track a swipe: in `0.0..1.0` the start button
-  fades out while previous and next fade in; up to `n_pages - 2` previous and
-  next are opaque and start is hidden; past that next fades out toward the
-  last page.
-- `start_btn.can_target` is `opacity_next < EPSILON` and `next_btn.can_target`
-  is `opacity_next > 0 && position <= forelast`, so a half-faded next button
-  cannot be clicked past the end.
-- `set_page` grabs focus on `previous_btn` when walking backward, on
-  `start_btn` on page 0, on `next_btn` otherwise.
-
-Port note: the three buttons come from one private `nav_button` factory, so a
-scan reports `Gtk.Button 1` against upstream's 3 and `css circular 1` against
-3. Three call sites, three buttons — not a gap.
-
-## src/widgets/image_page.rs + data/resources/ui/image-page.ui — one tour page
-
-| Widget | × | CSS | Signals | Notes |
-|---|---:|---|---|---|
-| template root (`Gtk.Widget` + `Adw.ClampLayout`) | 1 | `page` | — | `hexpand`/`vexpand`, `halign`/`valign: fill` |
-| `Gtk.Box` (`container`) | 1 | — | — | vertical, spacing 12, centred, `vexpand`, margins 12/12/12/48 |
-| `Gtk.Picture` (`picture`) | 1 | — | — | `can-shrink`, `content-fit: contain`, set from `resource-uri` |
-| `Gtk.Label` (`head_label`) | 1 | `title-1` | — | bound to the `head` property, `margin-top: 36` |
-| `Gtk.Label` (body) | 1 | `body` | — | bound to the `body` property, `lines: 2`, `wrap`, `margin-top: 12` |
-
-Properties: `resource-uri` (construct-only), `head` (construct-only), `body`
-(construct, writable — the window sets the welcome page's after construction).
-
-Port note: the port uses `Adwaita::Clamp` as the root instead of a
-`Gtk::Widget` subclass with an `AdwClampLayout` layout manager — the same
-constraint in one widget, and it is what carries the `page` class. The
-`last-page` class is added through an optional `style_class:` argument.
-Because `.page:nth-child(N)` selects on position among the carousel's
-children, the `page` class must stay on the widget the carousel holds; it does.
-
-## data/resources/style.css — the stylesheet
-
-Classes defined: `page` with `:nth-child(3)` (empty rule), `:nth-child(5)`
-(`up-and-down` keyframes, `hand-fg.svg` over `updown-bg.svg`) and
-`:nth-child(6)` (`left-and-right` keyframes, `hand-fg.svg` over
-`leftright-bg.svg`). Keyframes: `up-and-down`, `left-and-right`. Two gradient
-rules for pages 2 and 4 are commented out upstream and are commented out in
-the port too.
-
-Classes applied by the app but defined by libadwaita, not here: `title-1`,
-`body`, `circular`, `suggested-action`, `devel`. Applied but never defined
-anywhere: `last-page` (upstream sets it for the benefit of outside styling).
-
-## Gaps
-
-The port has full component parity with upstream, in both directions: every
-upstream unit has a port file, and there are no port files without an upstream
-counterpart. The original scaffold (`lib/gnome_tour.rb`,
-`lib/gnome_tour/application.rb`, `exe/gnome-tour`) has been deleted, so the app
-has one entry point — `exe/gnome-tour-rb` → `lib/gnome_tour_rb.rb`.
+Every upstream user-facing component — the application, the window and its
+four `win.` actions plus two accelerators, the paginator with its three
+buttons/carousel/key-controller, the seven image pages, the stylesheet
+animations, the icon set, and the desktop/metainfo/service packaging — has a
+corresponding, already-written file in `lib/` or `data/` on the `ruby`
+branch, with matching widgets, CSS classes, signals and actions as far as
+component identification can establish by reading. This is a component
+inventory, not a component-parity proof (string/count-level verification is
+`component-parity`'s and `translation-parity`'s job): the one soft spot is
+`translation-parity`'s open flag that the port's PO reader does not
+implement `msgctxt`/plural forms, which costs nothing against today's
+23-message catalogue but should be re-checked if upstream's catalogue ever
+grows a `msgctxt`-qualified string or a plural.
