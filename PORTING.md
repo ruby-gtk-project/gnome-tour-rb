@@ -1,4 +1,96 @@
-# Porting notes
+# Port status — gnome-tour-rb
+
+Resume point for the next run. Updated 2026-11-08, port @ `eafb24d`.
+
+## Upstream
+
+gnome-tour-rb, implemented in Ruby (GTK4 + Libadwaita). Spec is the Rust
+original on the `origin/main` ref of this same fork
+(`origin/main` @ `7ed8211cc07ceeea50e412d8168c5761caee9bea`), read with
+`git show origin/main:<path>` — never checked out, never merged.
+
+## Done
+
+Components implemented and observed working this session (`nix develop
+--command xvfb-run -a rake test`, all six files green; see Runtime below).
+
+| `lib` path | Ported from |
+| --- | --- |
+| `lib/gnome_tour_rb/application.rb` | `src/application.rs`, `src/main.rs` |
+| `lib/gnome_tour_rb/window.rb` | `src/widgets/window.rs` + `data/resources/ui/window.ui` |
+| `lib/gnome_tour_rb/paginator.rb` | `src/widgets/paginator.rs` + `data/resources/ui/paginator.ui` |
+| `lib/gnome_tour_rb/image_page.rb` | `src/widgets/image_page.rs` + `data/resources/ui/image-page.ui` |
+| `lib/gnome_tour_rb/config.rb` | `src/config.rs.in` + the meson `profile` option |
+| `lib/gnome_tour_rb/os_info.rb` | `glib::os_info` (no Ruby binding; reads `/etc/os-release` directly) |
+| `lib/gnome_tour_rb/i18n.rb` | gettext (no Ruby binding; reads `po/*.po` directly) |
+| `lib/gnome_tour_rb/log.rb` | `env_logger` usage in `src/main.rs` |
+| `lib/gnome_tour_rb/paths.rb` | GResource path layout (replaced by on-disk paths under `data/`) |
+| `scripts/merge_translations.rb` | `i18n.merge_file` in `data/meson.build` |
+| `data/style.css` (loaded as-is) | `data/resources/style.css` |
+
+Each is confirmed against upstream line-for-line in `.reports/component-parity.md`
+(4/4 UI units, 5/5 support units at parity) and exercised live by the drive
+suite, not just required successfully.
+
+## Runtime
+
+Drive command:
+
+```
+nix develop --command xvfb-run -a ruby test/drive_tour.rb
+```
+
+Result this session: **drive_ok=true, 43 passed / 0 failed**, covering 7
+components (application actions/accels, window, the 7-page repeater,
+paginator button fade/target state, the `Left`/`Right` key controller, the
+devel profile, both window-close paths).
+
+Full spec run (the project has no RSpec suite under `spec/`; its test gate is
+the six scripts `rake test` runs under the same display):
+
+```
+nix develop --command xvfb-run -a rake test
+```
+
+Result this session: **6 passed / 0 failed** —
+`test/catalogue_test.rb`, `test/config_test.rb`, `test/cli_test.rb`,
+`test/quit_test.rb`, `test/drive_tour.rb` (the 43/0 above),
+`test/locale_test.rb` — all green, no errors, no skipped checks.
+
+## Not started
+
+None. `.reports/component-inventory.md` found a Ruby counterpart for every
+upstream source file; no upstream component is missing a `lib/` file.
+
+## Open gaps
+
+`.reports/accountability-ensurance.md`'s latest re-audit (2026-11-07, port @
+`ef7461e`, re-verified this session with no `lib/`, `exe/`, `test/`, `po/`,
+`data/` commits in between) reports **0 gap(s), clean=true**: no TODO/FIXME/
+"not implemented" language describing missing behaviour, no claim in any
+`.reports/` file resting on a check that was never executed.
+`.reports/test-parity.md` and `.reports/translation-parity.md` likewise both
+report 0 gaps (translation catalogue 23/23 msgids, 63/63 languages,
+byte-identical to upstream `po/`).
+
+## Blockers
+
+None that stop porting. Two items are flagged as open questions, not
+blockers:
+
+- **Flatpak/GitLab CI packaging** (`build-aux/dist-vendor.sh`,
+  `build-aux/org.gnome.TourDevel.json`, `.gitlab-ci.yml`) was not carried
+  over; the port uses `flake.nix` + `.github/workflows/ci.yml` instead.
+  Whether a Flatpak can still be produced from the upstream manifest shape,
+  or whether GNOME's own CI infra can run this port's build, is unverified
+  and left open.
+- **The PO reader has no plural/`msgctxt` support** (`lib/gnome_tour_rb/i18n.rb`'s
+  `parse_po`). Costs nothing today — upstream's 23-message catalogue uses
+  neither — but would silently misfile the next message that does.
+
+---
+
+# Porting notes (reference)
 
 What the Rust original does, what this port does instead, and the handful of
 ruby-gnome defects found on the way.
